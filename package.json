@@ -1,0 +1,41 @@
+{
+  "name": "site-audit",
+  "version": "0.1.0",
+  "description": "Audit a website you own: SEO, security headers and known vulnerabilities.",
+  "license": "MIT",
+  "author": "Augustin Kavera",
+  "type": "module",
+  "bin": {
+    "site-audit": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.en.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p tsconfig.json",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "seo",
+    "security",
+    "audit",
+    "headers",
+    "cli"
+  ],
+  "dependencies": {
+    "node-html-parser": "^9.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.1",
+    "typescript": "^6.0.3"
+  }
+}
