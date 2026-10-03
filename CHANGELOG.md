@@ -1,0 +1,16 @@
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.0] - 2026-10-04
+
+### Added
+
+- `site-audit <url>` command with `--only`, `--json`, `--fail-on` and `--timeout`.
+- SEO checks: status, redirects, HTTP to HTTPS redirect, title, meta description, h1, lang, viewport, canonical, noindex, robots.txt, sitemap, Open Graph, image alt, response time, size, compression, cache headers.
+- Security checks: HTTPS, TLS certificate expiry, issuer and protocol, HSTS, CSP, nosniff, clickjacking, Referrer-Policy, Permissions-Policy, cookie flags, information leaks, mixed content, security.txt.
+- Vulnerability checks: exposed sensitive files with soft 404 protection, directory listing, meta generator, JavaScript libraries checked against OSV.
+- French terminal output with a score out of 100 per category, JSON report, exit codes for CI.
