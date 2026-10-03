@@ -24,14 +24,13 @@ export interface Report {
   summary: Partial<Record<Category, CategorySummary>>;
 }
 
-const WEIGHTS = { pass: 1, warn: 0.5, fail: 0 } as const;
 const RANK: Record<Level, number> = { info: 0, pass: 0, warn: 1, fail: 2 };
 
 export function summarize(findings: Finding[]): CategorySummary {
   const s: CategorySummary = { pass: 0, warn: 0, fail: 0, info: 0, score: null };
   for (const finding of findings) s[finding.level]++;
   const scored = s.pass + s.warn + s.fail;
-  if (scored) s.score = Math.round((100 * (s.pass * WEIGHTS.pass + s.warn * WEIGHTS.warn)) / scored);
+  if (scored) s.score = Math.round((100 * (s.pass + s.warn * 0.5)) / scored);
   return s;
 }
 

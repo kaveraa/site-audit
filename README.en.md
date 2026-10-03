@@ -91,7 +91,7 @@ The page is downloaded once and shared by all checks. Extra requests are made on
 
 ### Vulnerabilities
 
-- Exposed sensitive files: `/.git/HEAD`, `/.env`, `/.DS_Store`, `/phpinfo.php`, `/server-status`, `/wp-config.php.bak`, `/backup.zip`, `/.svn/entries`, `/composer.lock`, `/package.json`. One GET per file, at most three at a time. To avoid false positives (soft 404 pages, single page apps), a random missing URL is fetched first: an identical response is ignored, and the content of each file is validated (`.git/HEAD` must start with `ref:` or be a hash, `.env` must have `KEY=value` lines, and so on).
+- Exposed sensitive files: `/.git/HEAD`, `/.env`, `/.DS_Store`, `/phpinfo.php`, `/server-status`, `/wp-config.php.bak`, `/backup.zip`, `/.svn/entries`, `/composer.lock`, `/package.json`. One GET per file, one after another. To avoid false positives (soft 404 pages, single page apps), a random missing URL is fetched first: an identical response is ignored, and the content of each file is validated (`.git/HEAD` must start with `ref:` or be a hash, `.env` must have `KEY=value` lines, and so on).
 - Directory listing (`Index of /`) on the page and on `/uploads/`, `/images/`, `/assets/`.
 - Technology fingerprint: `<meta name="generator">` (WordPress, Joomla, Drupal and their version) and JavaScript libraries whose version shows in script URLs (`jquery-3.4.1.min.js`, `/jquery@3.4.1/`, `bootstrap/4.3.1/`, `?ver=3.7.1`). For each known library the [OSV](https://osv.dev) database is queried, and each vulnerability is listed with its id, summary and fixed version when there is one: fail for high, critical or unknown severity, warn otherwise. If OSV cannot be reached, an info finding says so.
 

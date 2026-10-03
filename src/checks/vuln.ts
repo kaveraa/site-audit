@@ -30,19 +30,6 @@ export const SENSITIVE_FILES: { path: string; level: Level; test: (body: string)
   { path: '/package.json', level: 'warn', test: (b) => jsonWith(b, 'dependencies', 'devDependencies', 'scripts') },
 ];
 
-async function pool<T, R>(items: T[], size: number, fn: (item: T) => Promise<R>): Promise<R[]> {
-  const out: R[] = [];
-  let next = 0;
-  const worker = async () => {
-    while (next < items.length) {
-      const i = next++;
-      out[i] = await fn(items[i]!);
-    }
-  };
-  await Promise.all(Array.from({ length: size }, worker));
-  return out;
-}
-
 const slug = (path: string) => path.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const isListing = (body: string) => /<(title|h1)>\s*Index of \//i.test(body);
 
@@ -54,14 +41,15 @@ export const vulnChecks: Check[] = [
   check('exposed-files', async (ctx) => {
     const baseline = await ctx.get(`/site-audit-${randomUUID()}`);
     const sameAsBaseline = (r: FetchResult) => r.status === baseline.status && r.body === baseline.body;
-    const results = await pool(SENSITIVE_FILES, 3, async (file) => {
+    const results: { file: (typeof SENSITIVE_FILES)[number]; exposed?: boolean; error?: string }[] = [];
+    for (const file of SENSITIVE_FILES) {
       try {
         const res = await ctx.get(file.path);
-        return { file, exposed: res.status === 200 && !sameAsBaseline(res) && file.test(res.body) };
+        results.push({ file, exposed: res.status === 200 && !sameAsBaseline(res) && file.test(res.body) });
       } catch (error) {
-        return { file, error: errorMessage(error) };
+        results.push({ file, error: errorMessage(error) });
       }
-    });
+    }
     const findings: Finding[] = results.filter((r) => r.exposed).map(({ file }) =>
       f(`exposed.${slug(file.path)}`, file.level, `Fichier sensible exposé : ${file.path}`, `${new URL(file.path, ctx.url).href} est accessible publiquement`,
         `Supprimer ${file.path} du serveur ou en bloquer l'accès (réponse 403 ou 404) dans la configuration du serveur web.`));
