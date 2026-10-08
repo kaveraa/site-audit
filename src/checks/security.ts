@@ -152,7 +152,9 @@ export const securityChecks: Check[] = [
     const res = await ctx.get('/.well-known/security.txt', { follow: true });
     const ok = res.status === 200 && /^contact\s*:/im.test(res.body);
     return [f('security-txt', ok ? 'pass' : 'info', 'Fichier security.txt',
-      ok ? '/.well-known/security.txt présent' : `Absent (code ${res.status})`,
+      ok ? '/.well-known/security.txt présent'
+        : res.status === 200 ? 'Absent : l\'URL répond 200 mais sans ligne Contact:, ce n\'est pas un security.txt (page du site renvoyée à la place ?)'
+        : `Absent (code ${res.status})`,
       'Publier /.well-known/security.txt avec au moins Contact: et Expires: (voir securitytxt.org).')];
   }),
 ];

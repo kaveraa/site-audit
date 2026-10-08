@@ -1,8 +1,12 @@
 # site-audit
 
-Français | [English](README.en.md)
+<p align="center"><img src="art/banner.svg" alt="site-audit" width="100%"></p>
 
-Outil en ligne de commande qui audite un site web dont vous êtes propriétaire sur trois axes : **SEO**, **sécurité** et **vulnérabilités connues**. Pour chaque point qui n'est pas au vert, il indique un correctif concret.
+**English** - [Français](https://github.com/kaveraa/site-audit/blob/main/README.fr.md)
+
+A command-line tool that audits a website you own on three axes: **SEO**, **security** and **known vulnerabilities**. For every point that is not green, it gives a concrete fix.
+
+The terminal output is in French.
 
 ```
 $ site-audit example.com
@@ -23,81 +27,81 @@ Page analysée : https://example.com/ (HTTP 200, 0 redirection(s))
   Vulnérabilités   score 100/100   3 OK, 0 ATTENTION, 0 ECHEC, 1 INFO
 ```
 
-## Installation
+## Install
 
-Node.js 22 ou plus récent est nécessaire.
+You need Node.js 22 or newer.
 
 ```sh
-git clone <dépôt> site-audit
+git clone <repository> site-audit
 cd site-audit
 npm install
-npm i -g .          # installe la commande site-audit
+npm i -g .          # installs the site-audit command
 ```
 
-Sans installation globale, depuis le dossier du projet :
+Without a global install, from the project folder:
 
 ```sh
 npx site-audit https://example.com
 ```
 
-## Utilisation
+## Usage
 
 ```
 site-audit <url> [--only seo,security,vuln] [--json] [--fail-on warn|fail] [--timeout <ms>]
 ```
 
-| Option | Rôle |
+| Option | Purpose |
 | --- | --- |
-| `<url>` | page à auditer ; `https://` est ajouté si aucun schéma n'est donné |
-| `--only` | catégories à vérifier, séparées par des virgules (par défaut : toutes) |
-| `--json` | rapport complet en JSON sur la sortie standard, rien d'autre |
-| `--fail-on` | code de sortie 1 si un résultat atteint ce niveau (`warn` ou `fail`) |
-| `--timeout` | délai maximal par requête, en millisecondes (par défaut : 10000) |
-| `--help` | aide en français |
+| `<url>` | page to audit; `https://` is added when no scheme is given |
+| `--only` | comma-separated categories to check (default: all) |
+| `--json` | full report as JSON on stdout, nothing else |
+| `--fail-on` | exit code 1 if a finding is at or above this level (`warn` or `fail`) |
+| `--timeout` | maximum time per request, in milliseconds (default: 10000) |
+| `--help` | help (in French) |
 
-Exemples :
+Examples:
 
 ```sh
-site-audit monsite.fr
-site-audit https://monsite.fr/blog --only seo
-site-audit https://monsite.fr --only security,vuln --fail-on fail
-site-audit https://monsite.fr --json > rapport.json
+site-audit mysite.com
+site-audit https://mysite.com/blog --only seo
+site-audit https://mysite.com --only security,vuln --fail-on fail
+site-audit https://mysite.com --json > report.json
 ```
 
-La couleur est désactivée automatiquement quand la sortie n'est pas un terminal ou quand la variable `NO_COLOR` est définie.
+Colour is turned off when stdout is not a terminal or when `NO_COLOR` is set.
 
-## Vérifications
+## Checks
 
-La page est téléchargée une seule fois et partagée entre les vérifications. Des requêtes supplémentaires ne sont faites que lorsqu'une vérification en a besoin (robots.txt, sitemap, fichiers sensibles, etc.) ; les vérifications s'exécutent l'une après l'autre, avec l'en-tête `User-Agent: site-audit/<version>`.
+The page is downloaded once and shared by all checks. Extra requests are made only when a check needs them (robots.txt, sitemap, sensitive files, and so on); checks run one after another, with the header `User-Agent: site-audit/<version>`.
 
 ### SEO
 
-- Code HTTP de la page finale, longueur de la chaîne de redirections (ATTENTION au-delà d'une), redirection HTTP -> HTTPS.
-- `<title>` présent et de 30 à 60 caractères ; meta description de 70 à 160 caractères ; un seul `<h1>` ; attribut `lang` sur `<html>` ; meta viewport ; lien canonical présent et absolu ; `noindex` dans la meta robots ou l'en-tête `X-Robots-Tag` (ECHEC).
-- `robots.txt` accessible, sans `Disallow: /` pour tous les robots, avec une ligne `Sitemap:` ; sitemap (celui de robots.txt, sinon `/sitemap.xml`) accessible et au format XML.
-- Balises Open Graph `og:title`, `og:description`, `og:image` ; nombre d'images sans attribut `alt`.
-- Performance : temps de réponse du serveur (TTFB), temps de téléchargement, taille du HTML, compression (`gzip`, `br`, `zstd`), en-têtes de cache.
+- HTTP status of the final page, redirect chain length (warn above one hop), HTTP -> HTTPS redirect.
+- `<title>` present and 30 to 60 characters; meta description of 70 to 160 characters; exactly one `<h1>`; `lang` attribute on `<html>`; meta viewport; canonical link present and absolute; `noindex` in meta robots or the `X-Robots-Tag` header (fail).
+- `robots.txt` reachable, no `Disallow: /` for all agents, with a `Sitemap:` line; sitemap (from robots.txt, else `/sitemap.xml`) reachable and in XML.
+- Open Graph tags `og:title`, `og:description`, `og:image`; number of images without `alt`.
+- Performance: time to first byte, download time, HTML size, compression (`gzip`, `br`, `zstd`), cache headers.
 
-### Sécurité
+### Security
 
-- HTTPS utilisé ; certificat TLS : reconnu ou refusé par les navigateurs (ECHEC si refusé : expiré, auto-signé, mauvais nom de domaine, chaîne incomplète), jours avant expiration (ECHEC si expiré ou moins de 7 jours, ATTENTION sous 30 jours), émetteur, protocole négocié (ATTENTION sous TLS 1.2).
-- HSTS avec un `max-age` d'au moins 6 mois (avec `includeSubDomains` et `preload` en information) ; Content-Security-Policy (ATTENTION si `unsafe-inline` ou `unsafe-eval` dans `script-src` ou `default-src`) ; `X-Content-Type-Options: nosniff` ; protection contre le clickjacking (`frame-ancestors` ou `X-Frame-Options`) ; `Referrer-Policy` ; `Permissions-Policy`.
-- Chaque cookie déposé par la page : attributs `Secure`, `HttpOnly`, `SameSite`.
-- Fuites d'informations : en-tête `Server` avec un numéro de version, `X-Powered-By`, `X-AspNet-Version`.
-- Contenu mixte : scripts, styles, images et iframes chargés en `http://` sur une page HTTPS.
-- Présence de `/.well-known/security.txt` (INFO si absent).
+- HTTPS used; TLS certificate: trusted or refused by browsers (fail if refused: expired, self-signed, wrong host name, incomplete chain), days until expiry (fail if expired or under 7 days, warn under 30), issuer, negotiated protocol (warn below TLS 1.2).
+- HSTS with `max-age` of at least 6 months (`includeSubDomains` and `preload` as info); Content-Security-Policy (warn on `unsafe-inline` or `unsafe-eval` in `script-src` or `default-src`); `X-Content-Type-Options: nosniff`; clickjacking protection (`frame-ancestors` or `X-Frame-Options`); `Referrer-Policy`; `Permissions-Policy`.
+- Every cookie set by the page: `Secure`, `HttpOnly`, `SameSite` flags.
+- Information leaks: `Server` header with a version number, `X-Powered-By`, `X-AspNet-Version`.
+- Mixed content: scripts, styles, images and iframes loaded over `http://` on an HTTPS page.
+- `/.well-known/security.txt` present (info if missing).
 
-### Vulnérabilités
+### Vulnerabilities
 
-- Fichiers sensibles exposés : `/.git/HEAD`, `/.env`, `/.DS_Store`, `/phpinfo.php`, `/server-status`, `/wp-config.php.bak`, `/backup.zip`, `/.svn/entries`, `/composer.lock`, `/package.json`. Une requête GET par fichier, l'une après l'autre. Pour éviter les faux positifs (pages 404 qui répondent 200, applications monopage), une URL aléatoire inexistante est d'abord demandée : une réponse identique est ignorée, et le contenu de chaque fichier est validé (`.git/HEAD` doit commencer par `ref:` ou être un hash, `.env` doit contenir des lignes `CLE=valeur`, etc.).
-- Listage de répertoires (`Index of /`) sur la page et sur `/uploads/`, `/images/`, `/assets/`.
-- Empreinte technologique : `<meta name="generator">` (WordPress, Joomla, Drupal et leur version) et bibliothèques JavaScript dont la version apparaît dans l'URL des scripts (`jquery-3.4.1.min.js`, `/jquery@3.4.1/`, `bootstrap/4.3.1/`, `?ver=3.7.1`). Pour chaque bibliothèque connue, la base [OSV](https://osv.dev) est interrogée et chaque vulnérabilité est listée avec son identifiant, son résumé et la version corrigée quand elle existe : ECHEC pour une gravité haute, critique ou inconnue, ATTENTION sinon. Si OSV est injoignable, un résultat INFO le signale.
+- Exposed sensitive files: `/.git/HEAD`, `/.env`, `/.DS_Store`, `/phpinfo.php`, `/server-status`, `/wp-config.php.bak`, `/backup.zip`, `/.svn/entries`, `/composer.lock`, `/package.json`. One GET per file, one after another. To avoid false positives (soft 404 pages, single page apps), a random missing URL is fetched first: an identical response is ignored, and the content of each file is validated (`.git/HEAD` must start with `ref:` or be a hash, `.env` must have `KEY=value` lines, and so on).
+- Directory listing (`Index of /`) on the page and on `/uploads/`, `/images/`, `/assets/`.
+- Technology fingerprint: `<meta name="generator">` (WordPress, Joomla, Drupal and their version) and JavaScript libraries whose version shows in script URLs (`jquery-3.4.1.min.js`, `/jquery@3.4.1/`, `bootstrap/4.3.1/`, `?ver=3.7.1`). For each known library the [OSV](https://osv.dev) database is queried, and each vulnerability is listed with its id, summary and fixed version when there is one: fail for high, critical or unknown severity, warn otherwise. If OSV cannot be reached, an info finding says so.
 
-Une erreur réseau dans une vérification devient un résultat INFO : l'audit va toujours jusqu'au bout.
+A network error in one check becomes an info finding: the audit always completes.
 
-## Format de sortie
+## Output format
 
-Chaque résultat a la forme :
+Each finding looks like:
 
 ```json
 {
@@ -110,45 +114,45 @@ Chaque résultat a la forme :
 }
 ```
 
-- `category` : `seo`, `security` ou `vuln`.
-- `level` : `pass` (OK), `warn` (ATTENTION), `fail` (ECHEC) ou `info` (INFO).
-- `detail` : valeur mesurée ; `fix` : correctif, absent pour un résultat OK.
+- `category`: `seo`, `security` or `vuln`.
+- `level`: `pass` (OK), `warn` (ATTENTION), `fail` (ECHEC) or `info` (INFO).
+- `detail`: measured value; `fix`: the fix, missing for a pass.
 
-Avec `--json`, le rapport complet contient : `tool`, `version`, `date`, `url`, `finalUrl`, `status`, `redirects` (liste `{ url, status }`), `timings` (`ttfb` et `total` en ms), `categories`, `findings` et `summary` (par catégorie : `pass`, `warn`, `fail`, `info`, `score`).
+With `--json`, the full report has: `tool`, `version`, `date`, `url`, `finalUrl`, `status`, `redirects` (list of `{ url, status }`), `timings` (`ttfb` and `total` in ms), `categories`, `findings` and `summary` (per category: `pass`, `warn`, `fail`, `info`, `score`).
 
-## Codes de sortie et intégration continue
+## Exit codes and CI
 
-| Code | Signification |
+| Code | Meaning |
 | --- | --- |
-| 0 | audit terminé, aucun seuil `--fail-on` atteint |
-| 1 | au moins un résultat atteint le niveau de `--fail-on` |
-| 2 | site injoignable ou arguments invalides (un certificat refusé donne un rapport de sécurité, pas ce code) |
+| 0 | audit done, no `--fail-on` threshold reached |
+| 1 | at least one finding is at the `--fail-on` level or above |
+| 2 | site unreachable or invalid arguments (a refused certificate gives a security report, not this code) |
 
-Sans `--fail-on`, le code est 0 dès que le site répond. Exemple dans une CI :
+Without `--fail-on`, the code is 0 as soon as the site answers. Example in CI:
 
 ```sh
-site-audit https://preprod.monsite.fr --only security,vuln --fail-on fail
+site-audit https://staging.mysite.com --only security,vuln --fail-on fail
 ```
 
 ## Score
 
-Pour chaque catégorie, chaque résultat OK vaut 1, ATTENTION 0,5 et ECHEC 0. Le score est la moyenne ramenée sur 100 et arrondie. Les résultats INFO ne comptent pas. Une catégorie sans résultat noté affiche `n/a`.
+In each category, a pass is worth 1, a warn 0.5 and a fail 0. The score is the average scaled to 100 and rounded. Info findings do not count. A category with no scored finding shows `n/a`.
 
-## Usage responsable
+## Responsible use
 
-N'auditez que des sites dont vous êtes propriétaire ou que vous êtes autorisé à tester. Les vérifications de vulnérabilités sont passives et légères : une poignée de requêtes GET vers des chemins connus, sans tentative d'exploitation, d'authentification ou de contournement. Elles restent des requêtes que les outils de détection du site peuvent remarquer.
+Only audit sites you own or are allowed to test. The vulnerability checks are passive and light: a handful of GET requests to well-known paths, with no attempt to exploit, log in or bypass anything. They are still requests that the site's monitoring may notice.
 
-## Développement
+## Development
 
 ```sh
 npm install
-npm test           # tests unitaires et d'intégration (serveur HTTP local, sans réseau)
+npm test           # unit and integration tests (local HTTP server, no network)
 npm run typecheck
-npm run build      # compile src/ vers dist/
+npm run build      # compiles src/ to dist/
 ```
 
-La variable d'environnement `SITE_AUDIT_OSV_URL` remplace l'adresse de l'API OSV ; elle sert aux tests.
+The `SITE_AUDIT_OSV_URL` environment variable replaces the OSV API address; it is used by the tests.
 
-## Licence
+## License
 
-MIT, voir [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
