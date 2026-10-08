@@ -45,7 +45,8 @@ export async function fetchPage(start: string, timeout: number): Promise<Page> {
   let url = start;
   for (;;) {
     const t0 = performance.now();
-    const res = await request(url, timeout);
+    // The failing hop and the chain so far ride on the error: a redirect target may be the one with a refused certificate.
+    const res = await request(url, timeout).catch((error: Error) => Promise.reject(Object.assign(error, { url, redirects })));
     const location = res.headers.get('location');
     if (res.status >= 300 && res.status < 400 && location) {
       await res.body?.cancel();
