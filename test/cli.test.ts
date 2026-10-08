@@ -201,11 +201,17 @@ CK4lDzFj5urqGeywHvcfWgIhANbX1G0qGulR33rlGrZ4I3IjRURX/L4Rhn7u3sDG
 -----END CERTIFICATE-----
 `;
 
-test('refused certificate: security report with a failed certificate instead of exit 2', async () => {
+test('refused certificate, direct or after an HTTP redirect: security report instead of exit 2', async () => {
   const server = createHttpsServer({ key: SELF_SIGNED_KEY, cert: SELF_SIGNED_CERT }, (_req, res) => res.end('ok'));
   await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
   const origin = `https://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  const redirect = await listen((_req, res) => res.writeHead(301, { location: `${origin}/` }).end());
   try {
+    const viaHttp = JSON.parse((await cli(redirect.origin, '--json')).stdout) as Report;
+    assert.equal(viaHttp.finalUrl, `${origin}/`);
+    assert.equal(viaHttp.redirects.length, 1);
+    assert.equal(viaHttp.findings.find((f) => f.id === 'security.tls-valid')!.level, 'fail');
+
     const { code, stdout } = await cli(origin, '--json', '--fail-on', 'fail');
     assert.equal(code, 1);
     const report = JSON.parse(stdout) as Report;
@@ -217,5 +223,6 @@ test('refused certificate: security report with a failed certificate instead of 
     assert.match((await cli(origin)).stdout, /Page non analysée/);
   } finally {
     server.close();
+    redirect.server.close();
   }
 });

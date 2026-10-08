@@ -6,7 +6,7 @@ import { buildContext } from './context.ts';
 import { errorMessage } from './finding.ts';
 import { getTlsInfo } from './http.ts';
 import { buildReport, exitCode, renderText } from './report.ts';
-import type { Category } from './types.ts';
+import type { Category, Hop } from './types.ts';
 import { VERSION } from './version.ts';
 
 const HELP = `site-audit ${VERSION} - audit SEO, sécurité et vulnérabilités d'un site web
@@ -87,14 +87,16 @@ async function main() {
   } catch (error) {
     // A refused certificate blocks the page in browsers too: report the certificate alone instead of failing.
     // One retry: a second TLS handshake right after the failed fetch is sometimes reset.
-    const readTls = () => getTlsInfo(url.hostname, Number(url.port) || 443, timeout);
-    const tls = url.protocol === 'https:' ? await readTls().catch(readTls).catch(() => undefined) : undefined;
+    const { url: failed = url.href, redirects = [] } = error as { url?: string; redirects?: Hop[] };
+    const target = new URL(failed);
+    const readTls = () => getTlsInfo(target.hostname, Number(target.port) || 443, timeout);
+    const tls = target.protocol === 'https:' ? await readTls().catch(readTls).catch(() => undefined) : undefined;
     if (!tls?.error) {
-      console.error(`site-audit : impossible de joindre ${url.href} : ${errorMessage(error)}`);
+      console.error(`site-audit : impossible de joindre ${failed} : ${errorMessage(error)}`);
       process.exit(2);
     }
     findings = tlsFindings(tls);
-    report = buildReport({ startUrl: url, url, status: 0, redirects: [], timings: { ttfb: 0, total: 0 } }, ['security'], findings);
+    report = buildReport({ startUrl: url, url: target, status: 0, redirects, timings: { ttfb: 0, total: 0 } }, ['security'], findings);
   }
   const color = Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
   console.log(values.json ? JSON.stringify(report, null, 2) : renderText(report, color));
