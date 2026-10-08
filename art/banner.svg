@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="440" viewBox="0 0 1280 440" font-family="'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0B1220"/><stop offset="1" stop-color="#16233A"/></linearGradient>
+    <linearGradient id="accents" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#818cf8"/></linearGradient>
+    <clipPath id="cards"><rect width="1280" height="440" rx="24"/></clipPath>
+  </defs>
+  <g clip-path="url(#cards)"><rect width="1280" height="440" fill="url(#bgs)"/><circle cx="60" cy="410" r="180" fill="#38bdf8" opacity="0.07"/><circle cx="1240" cy="-30" r="150" fill="#818cf8" opacity="0.08"/></g>
+
+  <!-- Loupe -->
+  <g transform="translate(80,70)" fill="none" stroke="#38bdf8" stroke-linecap="round">
+    <circle cx="34" cy="34" r="28" stroke-width="6"/>
+    <path d="M55 55 L78 78" stroke-width="9"/>
+    <path d="M22 35 L31 44 L47 25" stroke-width="5" stroke-linejoin="round"/>
+  </g>
+
+  <text x="180" y="122" font-size="60" font-weight="700" fill="#f8fafc">site-audit</text>
+  <rect x="182" y="140" width="120" height="6" rx="3" fill="url(#accents)"/>
+  <text x="80" y="208" font-size="24" fill="#94a3b8">Audit the website you own, from the terminal.</text>
+  <text x="80" y="244" font-size="24" fill="#94a3b8">A score per axis and a fix for every finding.</text>
+
+  <g font-size="18" font-weight="600" text-anchor="middle">
+    <rect x="80" y="286" width="80" height="40" rx="20" fill="#0EA5E9" opacity="0.16"/><text x="120" y="312" fill="#7DD3FC">SEO</text>
+    <rect x="170" y="286" width="112" height="40" rx="20" fill="#0EA5E9" opacity="0.16"/><text x="226" y="312" fill="#7DD3FC">Security</text>
+    <rect x="292" y="286" width="170" height="40" rx="20" fill="#0EA5E9" opacity="0.16"/><text x="377" y="312" fill="#7DD3FC">Vulnerabilities</text>
+  </g>
+  <text x="80" y="388" font-size="20" fill="#64748b" font-family="Consolas, 'Courier New', monospace">site-audit example.com --fail-on fail</text>
+
+  <!-- Terminal -->
+  <rect x="610" y="60" width="606" height="320" rx="16" fill="#0B1220" stroke="#38bdf8" stroke-opacity="0.35" stroke-width="2"/>
+  <circle cx="640" cy="90" r="7" fill="#FF5F57"/><circle cx="664" cy="90" r="7" fill="#FEBC2E"/><circle cx="688" cy="90" r="7" fill="#28C840"/>
+  <text x="1188" y="96" font-size="15" fill="#6B7F90" text-anchor="end">terminal</text>
+
+  <g font-family="Consolas, 'Courier New', monospace" font-size="19">
+    <text x="638" y="140"><tspan fill="#64748b">$ </tspan><tspan fill="#E6EDF3">site-audit example.com</tspan></text>
+
+    <text x="638" y="186" fill="#E6EDF3">SEO</text>
+    <rect x="830" y="172" width="240" height="14" rx="7" fill="#1e293b"/><rect x="830" y="172" width="228" height="14" rx="7" fill="#22c55e"/>
+    <text x="1188" y="186" fill="#E6EDF3" text-anchor="end">95/100</text>
+
+    <text x="638" y="222" fill="#E6EDF3">Sécurité</text>
+    <rect x="830" y="208" width="240" height="14" rx="7" fill="#1e293b"/><rect x="830" y="208" width="168" height="14" rx="7" fill="#eab308"/>
+    <text x="1188" y="222" fill="#E6EDF3" text-anchor="end">70/100</text>
+
+    <text x="638" y="258" fill="#E6EDF3">Vulnérabilités</text>
+    <rect x="830" y="244" width="240" height="14" rx="7" fill="#1e293b"/><rect x="830" y="244" width="240" height="14" rx="7" fill="#22c55e"/>
+    <text x="1188" y="258" fill="#E6EDF3" text-anchor="end">100/100</text>
+
+    <text x="638" y="304" fill="#ef4444" font-weight="700">ECHEC</text><text x="760" y="304" fill="#E6EDF3">Strict-Transport-Security</text>
+    <text x="638" y="334" fill="#eab308" font-weight="700">ATTENTION</text><text x="760" y="334" fill="#E6EDF3">Content-Security-Policy</text>
+    <text x="760" y="360" fill="#64748b" font-size="16">Correctif : ajouter l'en-tête ...</text>
+  </g>
+</svg>

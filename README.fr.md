@@ -1,5 +1,7 @@
 # site-audit
 
+<p align="center"><img src="art/banner.svg" alt="site-audit" width="100%"></p>
+
 [English](https://github.com/kaveraa/site-audit/blob/main/README.md) - **Français**
 
 Outil en ligne de commande qui audite un site web dont vous êtes propriétaire sur trois axes : **SEO**, **sécurité** et **vulnérabilités connues**. Pour chaque point qui n'est pas au vert, il indique un correctif concret.

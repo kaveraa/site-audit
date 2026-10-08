@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Banner at the top of the README files.
+
 ### Changed
 
 - The default README is now in English (`README.md`), the French version is in `README.fr.md`.
