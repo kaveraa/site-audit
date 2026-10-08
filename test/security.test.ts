@@ -27,6 +27,12 @@ test('certificate validity, expiry, issuer and protocol', async () => {
   const refused = await run('security.tls', makeContext({ tls: { protocol: 'TLSv1.3', validTo: new Date(Date.now() + 90 * DAY), issuer: 'X', error: 'CERT_HAS_EXPIRED' } }));
   assert.equal(level(refused, 'security.tls-valid'), 'fail');
   assert.match(find(refused, 'security.tls-valid')!.detail!, /CERT_HAS_EXPIRED/);
+  assert.equal(find(soon, 'security.tls-intercepted'), undefined);
+  const intercepted = await run('security.tls', makeContext({ tls: { protocol: 'TLSv1.1', validTo: new Date(Date.now() + 3 * DAY), issuer: 'Norton Web/Mail Shield - Norton Web/Mail Shield Root', error: null } }));
+  assert.match(find(intercepted, 'security.tls-intercepted')!.detail!, /Norton/);
+  assert.equal(level(intercepted, 'security.tls-valid'), 'pass');
+  assert.equal(level(intercepted, 'security.tls-expiry'), 'info');
+  assert.equal(level(intercepted, 'security.tls-protocol'), 'info');
 });
 
 test('HSTS', async () => {
