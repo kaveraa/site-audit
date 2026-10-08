@@ -82,5 +82,8 @@ test('mixed content', async () => {
 
 test('security.txt', async () => {
   assert.equal((await run('security.security-txt', makeContext({ routes: { '/.well-known/security.txt': { body: 'Contact: mailto:a@b.test\nExpires: 2027-01-01T00:00:00Z' } } })))[0]!.level, 'pass');
-  assert.equal((await run('security.security-txt', makeContext({ fallback: { status: 200, body: '<html></html>' } })))[0]!.level, 'info');
+  const html = (await run('security.security-txt', makeContext({ fallback: { status: 200, body: '<html></html>' } })))[0]!;
+  assert.equal(html.level, 'info');
+  assert.match(html.detail!, /ce n'est pas un security\.txt/);
+  assert.match((await run('security.security-txt', makeContext()))[0]!.detail!, /Absent \(code 404\)/);
 });
