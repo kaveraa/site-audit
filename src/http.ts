@@ -85,14 +85,21 @@ export function getTlsInfo(host: string, port: number, timeout: number): Promise
   });
 }
 
+/** All OSV vulnerabilities for one npm package version, following next_page_token across pages. */
 export async function queryOsv(name: string, version: string, timeout: number): Promise<OsvVuln[]> {
-  const res = await fetch(process.env.SITE_AUDIT_OSV_URL ?? 'https://api.osv.dev/v1/query', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'user-agent': USER_AGENT },
-    body: JSON.stringify({ package: { name, ecosystem: 'npm' }, version }),
-    signal: AbortSignal.timeout(timeout),
-  });
-  if (!res.ok) throw new Error(`OSV a répondu ${res.status}`);
-  const data = (await res.json()) as { vulns?: OsvVuln[] };
-  return data.vulns ?? [];
+  const vulns: OsvVuln[] = [];
+  let pageToken: string | undefined;
+  do {
+    const res = await fetch(process.env.SITE_AUDIT_OSV_URL ?? 'https://api.osv.dev/v1/query', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'user-agent': USER_AGENT },
+      body: JSON.stringify({ package: { name, ecosystem: 'npm' }, version, page_token: pageToken }),
+      signal: AbortSignal.timeout(timeout),
+    });
+    if (!res.ok) throw new Error(`OSV a répondu ${res.status}`);
+    const data = (await res.json()) as { vulns?: OsvVuln[]; next_page_token?: string };
+    vulns.push(...(data.vulns ?? []));
+    pageToken = data.next_page_token;
+  } while (pageToken);
+  return vulns;
 }
