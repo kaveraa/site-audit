@@ -82,7 +82,7 @@ The page is downloaded once and shared by all checks. Extra requests are made on
 
 ### Security
 
-- HTTPS used; TLS certificate: days until expiry (fail if expired or under 7 days, warn under 30), issuer, negotiated protocol (warn below TLS 1.2).
+- HTTPS used; TLS certificate: trusted or refused by browsers (fail if refused: expired, self-signed, wrong host name, incomplete chain), days until expiry (fail if expired or under 7 days, warn under 30), issuer, negotiated protocol (warn below TLS 1.2).
 - HSTS with `max-age` of at least 6 months (`includeSubDomains` and `preload` as info); Content-Security-Policy (warn on `unsafe-inline` or `unsafe-eval` in `script-src` or `default-src`); `X-Content-Type-Options: nosniff`; clickjacking protection (`frame-ancestors` or `X-Frame-Options`); `Referrer-Policy`; `Permissions-Policy`.
 - Every cookie set by the page: `Secure`, `HttpOnly`, `SameSite` flags.
 - Information leaks: `Server` header with a version number, `X-Powered-By`, `X-AspNet-Version`.
@@ -124,7 +124,7 @@ With `--json`, the full report has: `tool`, `version`, `date`, `url`, `finalUrl`
 | --- | --- |
 | 0 | audit done, no `--fail-on` threshold reached |
 | 1 | at least one finding is at the `--fail-on` level or above |
-| 2 | site unreachable or invalid arguments |
+| 2 | site unreachable or invalid arguments (a refused certificate gives a security report, not this code) |
 
 Without `--fail-on`, the code is 0 as soon as the site answers. Example in CI:
 

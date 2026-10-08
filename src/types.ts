@@ -28,6 +28,8 @@ export interface TlsInfo {
   protocol: string | null;
   validTo: Date;
   issuer: string;
+  /** Why browsers refuse the certificate (OpenSSL code), null if it is trusted. */
+  error: string | null;
 }
 
 export interface OsvVuln {

@@ -80,7 +80,7 @@ La page est téléchargée une seule fois et partagée entre les vérifications.
 
 ### Sécurité
 
-- HTTPS utilisé ; certificat TLS : jours avant expiration (ECHEC si expiré ou moins de 7 jours, ATTENTION sous 30 jours), émetteur, protocole négocié (ATTENTION sous TLS 1.2).
+- HTTPS utilisé ; certificat TLS : reconnu ou refusé par les navigateurs (ECHEC si refusé : expiré, auto-signé, mauvais nom de domaine, chaîne incomplète), jours avant expiration (ECHEC si expiré ou moins de 7 jours, ATTENTION sous 30 jours), émetteur, protocole négocié (ATTENTION sous TLS 1.2).
 - HSTS avec un `max-age` d'au moins 6 mois (avec `includeSubDomains` et `preload` en information) ; Content-Security-Policy (ATTENTION si `unsafe-inline` ou `unsafe-eval` dans `script-src` ou `default-src`) ; `X-Content-Type-Options: nosniff` ; protection contre le clickjacking (`frame-ancestors` ou `X-Frame-Options`) ; `Referrer-Policy` ; `Permissions-Policy`.
 - Chaque cookie déposé par la page : attributs `Secure`, `HttpOnly`, `SameSite`.
 - Fuites d'informations : en-tête `Server` avec un numéro de version, `X-Powered-By`, `X-AspNet-Version`.
@@ -122,7 +122,7 @@ Avec `--json`, le rapport complet contient : `tool`, `version`, `date`, `url`, `
 | --- | --- |
 | 0 | audit terminé, aucun seuil `--fail-on` atteint |
 | 1 | au moins un résultat atteint le niveau de `--fail-on` |
-| 2 | site injoignable ou arguments invalides |
+| 2 | site injoignable ou arguments invalides (un certificat refusé donne un rapport de sécurité, pas ce code) |
 
 Sans `--fail-on`, le code est 0 dès que le site répond. Exemple dans une CI :
 

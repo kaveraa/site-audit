@@ -34,7 +34,7 @@ export function summarize(findings: Finding[]): CategorySummary {
   return s;
 }
 
-export function buildReport(ctx: Context, categories: Category[], findings: Finding[]): Report {
+export function buildReport(ctx: Pick<Context, 'startUrl' | 'url' | 'status' | 'redirects' | 'timings'>, categories: Category[], findings: Finding[]): Report {
   return {
     tool: 'site-audit',
     version: VERSION,
@@ -65,7 +65,9 @@ export function renderText(report: Report, color: boolean): string {
   const pad = ' '.repeat(13);
   const lines = [
     bold(`site-audit ${report.version} - ${report.url}`),
-    `Page analysée : ${report.finalUrl} (HTTP ${report.status}, ${report.redirects.length} redirection(s))`,
+    report.status
+      ? `Page analysée : ${report.finalUrl} (HTTP ${report.status}, ${report.redirects.length} redirection(s))`
+      : `Page non analysée : ${report.finalUrl} (certificat TLS refusé)`,
   ];
   for (const cat of report.categories) {
     lines.push('', bold(`== ${NAMES[cat]} ==`));

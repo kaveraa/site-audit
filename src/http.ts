@@ -74,7 +74,8 @@ export function getTlsInfo(host: string, port: number, timeout: number): Promise
       () => {
         const cert = socket.getPeerCertificate();
         const issuer = cert.issuer ? [cert.issuer.O, cert.issuer.CN].filter(Boolean).join(' - ') : '';
-        resolve({ protocol: socket.getProtocol(), validTo: new Date(cert.valid_to), issuer: issuer || 'inconnu' });
+        const error = socket.authorized ? null : String(socket.authorizationError);
+        resolve({ protocol: socket.getProtocol(), validTo: new Date(cert.valid_to), issuer: issuer || 'inconnu', error });
         socket.end();
       },
     );

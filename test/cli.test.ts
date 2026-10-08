@@ -2,6 +2,7 @@ import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { createServer as createHttpsServer } from 'node:https';
 import type { AddressInfo } from 'node:net';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
@@ -178,4 +179,43 @@ test('unreachable site and bad arguments exit 2', async () => {
   const help = await cli('--help');
   assert.equal(help.code, 0);
   assert.match(help.stdout, /Utilisation/);
+});
+
+// Self-signed for localhost, valid until 2126: browsers refuse it.
+const SELF_SIGNED_KEY = `-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg1oe3RY9GCIBSP5dP
+KjJZoxnMSFFmpN0qdQoLmtBd0LKhRANCAARAePkiYS82Nx+5F4zoWsp4AfvrwS1Y
+5GKtXLhsIdj8vCwsMcCcwRQk6zjHW/Cbss37G9qLsXoEB0J5k7lCiyVs
+-----END PRIVATE KEY-----
+`;
+const SELF_SIGNED_CERT = `-----BEGIN CERTIFICATE-----
+MIIBfzCCASWgAwIBAgIULNaM02bs2agRtuesWywK48/WJw4wCgYIKoZIzj0EAwIw
+FDESMBAGA1UEAwwJbG9jYWxob3N0MCAXDTI2MTAwODExMTUzOFoYDzIxMjYwOTE0
+MTExNTM4WjAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwWTATBgcqhkjOPQIBBggqhkjO
+PQMBBwNCAARAePkiYS82Nx+5F4zoWsp4AfvrwS1Y5GKtXLhsIdj8vCwsMcCcwRQk
+6zjHW/Cbss37G9qLsXoEB0J5k7lCiyVso1MwUTAdBgNVHQ4EFgQUy0pJLMQwcVsn
+RGNZTulFY+c2Uy4wHwYDVR0jBBgwFoAUy0pJLMQwcVsnRGNZTulFY+c2Uy4wDwYD
+VR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNIADBFAiB/nAJ2iV7DI+HgFHynWADE
+CK4lDzFj5urqGeywHvcfWgIhANbX1G0qGulR33rlGrZ4I3IjRURX/L4Rhn7u3sDG
+08zI
+-----END CERTIFICATE-----
+`;
+
+test('refused certificate: security report with a failed certificate instead of exit 2', async () => {
+  const server = createHttpsServer({ key: SELF_SIGNED_KEY, cert: SELF_SIGNED_CERT }, (_req, res) => res.end('ok'));
+  await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+  const origin = `https://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  try {
+    const { code, stdout } = await cli(origin, '--json', '--fail-on', 'fail');
+    assert.equal(code, 1);
+    const report = JSON.parse(stdout) as Report;
+    assert.deepEqual(report.categories, ['security']);
+    assert.equal(report.status, 0);
+    const valid = report.findings.find((f) => f.id === 'security.tls-valid')!;
+    assert.equal(valid.level, 'fail');
+    assert.match(valid.detail!, /\([A-Z_]+\)$/);
+    assert.match((await cli(origin)).stdout, /Page non analysée/);
+  } finally {
+    server.close();
+  }
 });

@@ -49,7 +49,7 @@ export function makeContext(o: Options = {}): Context & { requests: string[] } {
       if (route instanceof Error) throw route;
       return { url: href.href, status: route.status ?? 200, headers: new Headers(route.headers), body: route.body ?? '' };
     },
-    tls: async () => o.tls ?? { protocol: 'TLSv1.3', validTo: new Date(Date.now() + 90 * 86_400_000), issuer: 'Test CA' },
+    tls: async () => o.tls ?? { protocol: 'TLSv1.3', validTo: new Date(Date.now() + 90 * 86_400_000), issuer: 'Test CA', error: null },
     osv: o.osv ?? (async () => []),
   };
 }
