@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import { parseArgs } from 'node:util';
 import { ALL_CHECKS, CATEGORIES, runChecks } from './audit.ts';
+import { tlsFindings } from './checks/security.ts';
 import { buildContext } from './context.ts';
 import { errorMessage } from './finding.ts';
+import { getTlsInfo } from './http.ts';
 import { buildReport, exitCode, renderText } from './report.ts';
 import type { Category } from './types.ts';
 import { VERSION } from './version.ts';
@@ -76,16 +78,24 @@ async function main() {
   }
   if (url.protocol !== 'http:' && url.protocol !== 'https:') fail(`seuls http et https sont pris en charge : ${raw}`);
 
-  let ctx;
-  try {
-    ctx = await buildContext(url, timeout);
-  } catch (error) {
-    console.error(`site-audit : impossible de joindre ${url.href} : ${errorMessage(error)}`);
-    process.exit(2);
-  }
   const selected = categories as Category[];
-  const findings = await runChecks(ctx, ALL_CHECKS.filter((c) => selected.includes(c.category)));
-  const report = buildReport(ctx, selected, findings);
+  let findings, report;
+  try {
+    const ctx = await buildContext(url, timeout);
+    findings = await runChecks(ctx, ALL_CHECKS.filter((c) => selected.includes(c.category)));
+    report = buildReport(ctx, selected, findings);
+  } catch (error) {
+    // A refused certificate blocks the page in browsers too: report the certificate alone instead of failing.
+    // One retry: a second TLS handshake right after the failed fetch is sometimes reset.
+    const readTls = () => getTlsInfo(url.hostname, Number(url.port) || 443, timeout);
+    const tls = url.protocol === 'https:' ? await readTls().catch(readTls).catch(() => undefined) : undefined;
+    if (!tls?.error) {
+      console.error(`site-audit : impossible de joindre ${url.href} : ${errorMessage(error)}`);
+      process.exit(2);
+    }
+    findings = tlsFindings(tls);
+    report = buildReport({ startUrl: url, url, status: 0, redirects: [], timings: { ttfb: 0, total: 0 } }, ['security'], findings);
+  }
   const color = Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
   console.log(values.json ? JSON.stringify(report, null, 2) : renderText(report, color));
   process.exitCode = exitCode(findings, failOn);

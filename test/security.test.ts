@@ -13,16 +13,20 @@ test('https and http pages', async () => {
   assert.deepEqual(await run('security.tls', http), []);
 });
 
-test('certificate expiry, issuer and protocol', async () => {
-  const soon = await run('security.tls', makeContext({ tls: { protocol: 'TLSv1.2', validTo: new Date(Date.now() + 3 * DAY), issuer: 'Test CA' } }));
+test('certificate validity, expiry, issuer and protocol', async () => {
+  const soon = await run('security.tls', makeContext({ tls: { protocol: 'TLSv1.2', validTo: new Date(Date.now() + 3 * DAY), issuer: 'Test CA', error: null } }));
+  assert.equal(level(soon, 'security.tls-valid'), 'pass');
   assert.equal(level(soon, 'security.tls-expiry'), 'fail');
   assert.equal(level(soon, 'security.tls-protocol'), 'pass');
   assert.equal(find(soon, 'security.tls-issuer')!.detail, 'Test CA');
-  const month = await run('security.tls', makeContext({ tls: { protocol: 'TLSv1.1', validTo: new Date(Date.now() + 20 * DAY), issuer: 'X' } }));
+  const month = await run('security.tls', makeContext({ tls: { protocol: 'TLSv1.1', validTo: new Date(Date.now() + 20 * DAY), issuer: 'X', error: null } }));
   assert.equal(level(month, 'security.tls-expiry'), 'warn');
   assert.equal(level(month, 'security.tls-protocol'), 'warn');
-  const expired = await run('security.tls', makeContext({ tls: { protocol: 'TLSv1.3', validTo: new Date(Date.now() - DAY), issuer: 'X' } }));
+  const expired = await run('security.tls', makeContext({ tls: { protocol: 'TLSv1.3', validTo: new Date(Date.now() - DAY), issuer: 'X', error: null } }));
   assert.match(find(expired, 'security.tls-expiry')!.detail!, /Expiré/);
+  const refused = await run('security.tls', makeContext({ tls: { protocol: 'TLSv1.3', validTo: new Date(Date.now() + 90 * DAY), issuer: 'X', error: 'CERT_HAS_EXPIRED' } }));
+  assert.equal(level(refused, 'security.tls-valid'), 'fail');
+  assert.match(find(refused, 'security.tls-valid')!.detail!, /CERT_HAS_EXPIRED/);
 });
 
 test('HSTS', async () => {

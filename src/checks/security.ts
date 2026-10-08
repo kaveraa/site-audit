@@ -1,4 +1,4 @@
-import type { Check, Context, Finding } from '../types.ts';
+import type { Check, Context, Finding, TlsInfo } from '../types.ts';
 import { category } from '../finding.ts';
 
 const { f, check } = category('security');
@@ -16,6 +16,30 @@ export function parseCsp(csp: string): Map<string, string> {
   return directives;
 }
 
+/** Findings on the certificate and protocol of an HTTPS site. */
+export function tlsFindings(tls: TlsInfo): Finding[] {
+  const findings: Finding[] = [
+    tls.error
+      ? f('tls-valid', 'fail', 'Validité du certificat', `Certificat refusé par les navigateurs (${tls.error})`,
+        'Installer un certificat valide pour ce nom de domaine, signé par une autorité reconnue (par exemple Let\'s Encrypt), avec la chaîne intermédiaire complète.')
+      : f('tls-valid', 'pass', 'Validité du certificat', 'Certificat reconnu par les navigateurs'),
+  ];
+  if (Number.isNaN(tls.validTo.getTime())) {
+    findings.push(f('tls-expiry', 'info', 'Expiration du certificat', 'Date d\'expiration illisible'));
+  } else {
+    const days = Math.floor((tls.validTo.getTime() - Date.now()) / DAY);
+    const date = tls.validTo.toISOString().slice(0, 10);
+    findings.push(f('tls-expiry', days < 7 ? 'fail' : days < 30 ? 'warn' : 'pass', 'Expiration du certificat',
+      days < 0 ? `Expiré depuis le ${date}` : `Expire le ${date} (dans ${days} jours)`,
+      'Renouveler le certificat et automatiser le renouvellement (ACME, certbot).'));
+  }
+  findings.push(f('tls-issuer', 'info', 'Émetteur du certificat', tls.issuer));
+  const old = !tls.protocol || ['SSLv2', 'SSLv3', 'TLSv1', 'TLSv1.1'].includes(tls.protocol);
+  findings.push(f('tls-protocol', old ? 'warn' : 'pass', 'Protocole TLS négocié', tls.protocol ?? 'inconnu',
+    'Activer TLS 1.2 et 1.3 sur le serveur et désactiver les versions plus anciennes.'));
+  return findings;
+}
+
 export const securityChecks: Check[] = [
   check('https', (ctx) => [
     isHttps(ctx)
@@ -24,25 +48,7 @@ export const securityChecks: Check[] = [
         'Installer un certificat TLS (par exemple Let\'s Encrypt) et rediriger tout le trafic vers HTTPS.'),
   ]),
 
-  check('tls', async (ctx) => {
-    if (!isHttps(ctx)) return [];
-    const tls = await ctx.tls();
-    const findings: Finding[] = [];
-    if (Number.isNaN(tls.validTo.getTime())) {
-      findings.push(f('tls-expiry', 'info', 'Expiration du certificat', 'Date d\'expiration illisible'));
-    } else {
-      const days = Math.floor((tls.validTo.getTime() - Date.now()) / DAY);
-      const date = tls.validTo.toISOString().slice(0, 10);
-      findings.push(f('tls-expiry', days < 7 ? 'fail' : days < 30 ? 'warn' : 'pass', 'Expiration du certificat',
-        days < 0 ? `Expiré depuis le ${date}` : `Expire le ${date} (dans ${days} jours)`,
-        'Renouveler le certificat et automatiser le renouvellement (ACME, certbot).'));
-    }
-    findings.push(f('tls-issuer', 'info', 'Émetteur du certificat', tls.issuer));
-    const old = !tls.protocol || ['SSLv2', 'SSLv3', 'TLSv1', 'TLSv1.1'].includes(tls.protocol);
-    findings.push(f('tls-protocol', old ? 'warn' : 'pass', 'Protocole TLS négocié', tls.protocol ?? 'inconnu',
-      'Activer TLS 1.2 et 1.3 sur le serveur et désactiver les versions plus anciennes.'));
-    return findings;
-  }),
+  check('tls', async (ctx) => (isHttps(ctx) ? tlsFindings(await ctx.tls()) : [])),
 
   check('hsts', (ctx) => {
     if (!isHttps(ctx)) return [];
