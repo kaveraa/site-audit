@@ -66,12 +66,16 @@ function weak(req: IncomingMessage, res: ServerResponse) {
     let body = '';
     req.on('data', (chunk) => (body += chunk));
     req.on('end', () => {
-      const { package: pkg } = JSON.parse(body) as { package: { name: string } };
-      const vulns = pkg.name !== 'jquery' ? [] : [{
-        id: 'GHSA-gxr4-xjj5-5px2', summary: 'Potential XSS vulnerability in jQuery', database_specific: { severity: 'MODERATE' },
+      const { package: pkg, page_token } = JSON.parse(body) as { package: { name: string }; page_token?: string };
+      const vuln = (id: string) => ({
+        id, summary: 'Potential XSS vulnerability in jQuery', database_specific: { severity: 'MODERATE' },
         affected: [{ package: { name: 'jquery', ecosystem: 'npm' }, ranges: [{ type: 'SEMVER', events: [{ introduced: '1.2.0' }, { fixed: '3.5.0' }] }] }],
-      }];
-      res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ vulns }));
+      });
+      // jQuery answers on two pages, like OSV does for long lists.
+      const page = pkg.name !== 'jquery' ? { vulns: [] }
+        : page_token === 'p2' ? { vulns: [vuln('GHSA-jpcq-cgw6-v4j6')] }
+        : { vulns: [vuln('GHSA-gxr4-xjj5-5px2')], next_page_token: 'p2' };
+      res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(page));
     });
     return;
   }
@@ -131,6 +135,7 @@ test('weak site: findings in JSON', async () => {
   assert.equal(l['vuln.generator'], 'warn');
   assert.equal(l['vuln.osv.jquery.GHSA-gxr4-xjj5-5px2'], 'warn');
   assert.match(report.findings.find((f) => f.id === 'vuln.osv.jquery.GHSA-gxr4-xjj5-5px2')!.fix!, /3\.5\.0/);
+  assert.equal(l['vuln.osv.jquery.GHSA-jpcq-cgw6-v4j6'], 'warn', 'second OSV page');
   assert.deepEqual(report.categories, ['seo', 'security', 'vuln']);
   assert.ok(report.summary.vuln!.score! < 50);
 });
