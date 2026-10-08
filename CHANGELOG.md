@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Banner at the top of the README files.
+- HTTPS interception by an antivirus or proxy (Norton, Avast, Kaspersky, ESET, Bitdefender, Zscaler...) is reported as an info finding; expiry and protocol are then not scored.
 
 ### Changed
 

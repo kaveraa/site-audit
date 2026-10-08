@@ -82,7 +82,7 @@ La page est téléchargée une seule fois et partagée entre les vérifications.
 
 ### Sécurité
 
-- HTTPS utilisé ; certificat TLS : reconnu ou refusé par les navigateurs (ECHEC si refusé : expiré, auto-signé, mauvais nom de domaine, chaîne incomplète), jours avant expiration (ECHEC si expiré ou moins de 7 jours, ATTENTION sous 30 jours), émetteur, protocole négocié (ATTENTION sous TLS 1.2).
+- HTTPS utilisé ; certificat TLS : reconnu ou refusé par les navigateurs (ECHEC si refusé : expiré, auto-signé, mauvais nom de domaine, chaîne incomplète), jours avant expiration (ECHEC si expiré ou moins de 7 jours, ATTENTION sous 30 jours), émetteur, protocole négocié (ATTENTION sous TLS 1.2). Quand un antivirus ou un proxy re-signe le HTTPS sur votre machine (Norton, Avast, Kaspersky, ESET, Bitdefender, Zscaler...), un résultat INFO le signale et l'expiration et le protocole ne sont pas notés, puisqu'ils décrivent son certificat.
 - HSTS avec un `max-age` d'au moins 6 mois (avec `includeSubDomains` et `preload` en information) ; Content-Security-Policy (ATTENTION si `unsafe-inline` ou `unsafe-eval` dans `script-src` ou `default-src`) ; `X-Content-Type-Options: nosniff` ; protection contre le clickjacking (`frame-ancestors` ou `X-Frame-Options`) ; `Referrer-Policy` ; `Permissions-Policy`.
 - Chaque cookie déposé par la page : attributs `Secure`, `HttpOnly`, `SameSite`.
 - Fuites d'informations : en-tête `Server` avec un numéro de version, `X-Powered-By`, `X-AspNet-Version`.

@@ -84,7 +84,7 @@ The page is downloaded once and shared by all checks. Extra requests are made on
 
 ### Security
 
-- HTTPS used; TLS certificate: trusted or refused by browsers (fail if refused: expired, self-signed, wrong host name, incomplete chain), days until expiry (fail if expired or under 7 days, warn under 30), issuer, negotiated protocol (warn below TLS 1.2).
+- HTTPS used; TLS certificate: trusted or refused by browsers (fail if refused: expired, self-signed, wrong host name, incomplete chain), days until expiry (fail if expired or under 7 days, warn under 30), issuer, negotiated protocol (warn below TLS 1.2). When an antivirus or proxy re-signs HTTPS on your machine (Norton, Avast, Kaspersky, ESET, Bitdefender, Zscaler...), an info finding says so and expiry and protocol are not scored, since they describe its certificate.
 - HSTS with `max-age` of at least 6 months (`includeSubDomains` and `preload` as info); Content-Security-Policy (warn on `unsafe-inline` or `unsafe-eval` in `script-src` or `default-src`); `X-Content-Type-Options: nosniff`; clickjacking protection (`frame-ancestors` or `X-Frame-Options`); `Referrer-Policy`; `Permissions-Policy`.
 - Every cookie set by the page: `Secure`, `HttpOnly`, `SameSite` flags.
 - Information leaks: `Server` header with a version number, `X-Powered-By`, `X-AspNet-Version`.

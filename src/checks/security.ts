@@ -5,6 +5,8 @@ const { f, check } = category('security');
 
 const DAY = 86_400_000;
 const isHttps = (ctx: Context) => ctx.url.protocol === 'https:';
+/** Antivirus and proxies known to re-sign HTTPS traffic, matched on the certificate issuer. */
+const INTERCEPTORS = /\b(Norton|Avast|AVG|Kaspersky|ESET|Bitdefender|Sophos|Fortinet|FortiGate|Zscaler|Netskope)\b/i;
 
 /** CSP directives as name -> value. Several policies (comma-separated) are merged. */
 export function parseCsp(csp: string): Map<string, string> {
@@ -37,7 +39,14 @@ export function tlsFindings(tls: TlsInfo): Finding[] {
   const old = !tls.protocol || ['SSLv2', 'SSLv3', 'TLSv1', 'TLSv1.1'].includes(tls.protocol);
   findings.push(f('tls-protocol', old ? 'warn' : 'pass', 'Protocole TLS négocié', tls.protocol ?? 'inconnu',
     'Activer TLS 1.2 et 1.3 sur le serveur et désactiver les versions plus anciennes.'));
-  return findings;
+  // An antivirus or proxy that inspects HTTPS re-signs the certificate: expiry, issuer and protocol are its own, not the
+  // server's. Validity stays scored: it re-signs a refused certificate with an untrusted root, so the verdict carries through.
+  if (!INTERCEPTORS.test(tls.issuer)) return findings;
+  return [
+    f('tls-intercepted', 'info', 'Connexion HTTPS interceptée', `Certificat émis par ${tls.issuer} sur cette machine, pas par le serveur : expiration et protocole ne sont pas notés`,
+      'Relancer l\'audit depuis une machine sans inspection HTTPS (CI, autre poste) ou désactiver l\'analyse HTTPS de l\'antivirus.'),
+    ...findings.map((finding) => (finding.id === 'security.tls-valid' ? finding : { ...finding, level: 'info' as const })),
+  ];
 }
 
 export const securityChecks: Check[] = [
