@@ -1,6 +1,11 @@
 # site-audit
 
-<p align="center"><img src="art/banner.svg" alt="site-audit" width="100%"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/kaveraa/site-audit/24264e0/art/banner.svg" alt="site-audit" width="100%"></p>
+
+[![Tests](https://github.com/kaveraa/site-audit/actions/workflows/tests.yml/badge.svg)](https://github.com/kaveraa/site-audit/actions/workflows/tests.yml)
+[![npm](https://img.shields.io/npm/v/@kaveraa/site-audit.svg)](https://www.npmjs.com/package/@kaveraa/site-audit)
+[![Téléchargements](https://img.shields.io/npm/dm/@kaveraa/site-audit.svg)](https://www.npmjs.com/package/@kaveraa/site-audit)
+[![Licence](https://img.shields.io/github/license/kaveraa/site-audit.svg)](https://github.com/kaveraa/site-audit/blob/main/LICENSE)
 
 [English](https://github.com/kaveraa/site-audit/blob/main/README.md) - **Français**
 
@@ -30,16 +35,13 @@ Page analysée : https://example.com/ (HTTP 200, 0 redirection(s))
 Node.js 22 ou plus récent est nécessaire.
 
 ```sh
-git clone <dépôt> site-audit
-cd site-audit
-npm install
-npm i -g .          # installe la commande site-audit
+npm install -g @kaveraa/site-audit   # installe la commande site-audit
 ```
 
-Sans installation globale, depuis le dossier du projet :
+Ou pour un lancement ponctuel, sans installation :
 
 ```sh
-npx site-audit https://example.com
+npx @kaveraa/site-audit https://example.com
 ```
 
 ## Utilisation
@@ -143,6 +145,8 @@ N'auditez que des sites dont vous êtes propriétaire ou que vous êtes autoris�
 ## Développement
 
 ```sh
+git clone https://github.com/kaveraa/site-audit.git
+cd site-audit
 npm install
 npm test           # tests unitaires et d'intégration (serveur HTTP local, sans réseau)
 npm run typecheck
@@ -153,4 +157,4 @@ La variable d'environnement `SITE_AUDIT_OSV_URL` remplace l'adresse de l'API OSV
 
 ## Licence
 
-MIT, voir [LICENSE](LICENSE).
+MIT, voir [LICENSE](LICENSE). Contribuer : [CONTRIBUTING.md](https://github.com/kaveraa/site-audit/blob/main/CONTRIBUTING.md).

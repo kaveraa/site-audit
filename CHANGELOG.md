@@ -1,32 +1,24 @@
 # Changelog
 
-All notable changes to this project are documented in this file.
+**FR** Toutes les évolutions notables du paquet sont listées ici. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le projet respecte le [versionnage sémantique](https://semver.org/lang/fr/).
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+**EN** All important changes of the package are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [semantic versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Added
+## [0.1.0] - 2026-10-08
 
-- Banner at the top of the README files.
-- HTTPS interception by an antivirus or proxy (Norton, Avast, Kaspersky, ESET, Bitdefender, Zscaler...) is reported as an info finding; expiry and protocol are then not scored.
+### Ajouté / Added
 
-### Changed
-
-- The default README is now in English (`README.md`), the French version is in `README.fr.md`.
-- A TLS certificate refused by browsers (expired, self-signed, wrong host name, incomplete chain) is a security failure. When it blocks the page, directly or after a redirect from HTTP, the report shows the certificate findings instead of exiting with code 2.
-
-### Fixed
-
-- OSV results now follow `next_page_token`: a library with many advisories no longer loses the ones after the first page.
-
-## [0.1.0] - 2026-10-04
-
-### Added
-
-- `site-audit <url>` command with `--only`, `--json`, `--fail-on` and `--timeout`.
-- SEO checks: status, redirects, HTTP to HTTPS redirect, title, meta description, h1, lang, viewport, canonical, noindex, robots.txt, sitemap, Open Graph, image alt, response time, size, compression, cache headers.
-- Security checks: HTTPS, TLS certificate expiry, issuer and protocol, HSTS, CSP, nosniff, clickjacking, Referrer-Policy, Permissions-Policy, cookie flags, information leaks, mixed content, security.txt.
-- Vulnerability checks: exposed sensitive files with soft 404 protection, directory listing, meta generator, JavaScript libraries checked against OSV.
-- French terminal output with a score out of 100 per category, JSON report, exit codes for CI.
+- **FR** Commande `site-audit <url>` avec `--only`, `--json`, `--fail-on` et `--timeout`, sortie en français avec un score sur 100 par axe, rapport JSON et codes de sortie pour la CI.
+  **EN** `site-audit <url>` command with `--only`, `--json`, `--fail-on` and `--timeout`, French output with a score out of 100 per axis, JSON report and exit codes for CI.
+- **FR** SEO : statut, redirections, passage de HTTP à HTTPS, title, meta description, h1, lang, viewport, canonical, noindex, robots.txt, sitemap, Open Graph, alt des images, temps de réponse, poids, compression, en-têtes de cache.
+  **EN** SEO: status, redirects, HTTP to HTTPS redirect, title, meta description, h1, lang, viewport, canonical, noindex, robots.txt, sitemap, Open Graph, image alt, response time, size, compression, cache headers.
+- **FR** Sécurité : HTTPS, certificat TLS (refusé par les navigateurs, expiration, émetteur, protocole), HSTS, CSP, nosniff, clickjacking, Referrer-Policy, Permissions-Policy, drapeaux des cookies, fuites d'informations techniques, contenu mixte, security.txt.
+  **EN** Security: HTTPS, TLS certificate (refused by browsers, expiry, issuer, protocol), HSTS, CSP, nosniff, clickjacking, Referrer-Policy, Permissions-Policy, cookie flags, technical information leaks, mixed content, security.txt.
+- **FR** Un certificat refusé qui bloque la page, directement ou après une redirection depuis HTTP, donne un rapport de sécurité au lieu d'un échec.
+  **EN** A refused certificate that blocks the page, directly or after a redirect from HTTP, gives a security report instead of a failure.
+- **FR** L'interception du HTTPS par un antivirus ou un proxy (Norton, Avast, Kaspersky, ESET, Bitdefender, Zscaler...) est signalée ; l'expiration et le protocole ne sont alors pas notés.
+  **EN** HTTPS interception by an antivirus or proxy (Norton, Avast, Kaspersky, ESET, Bitdefender, Zscaler...) is reported; expiry and protocol are then not scored.
+- **FR** Vulnérabilités : fichiers sensibles exposés avec protection contre les fausses 404, listing de dossier, meta generator, bibliothèques JavaScript vérifiées dans la base OSV (toutes les pages de résultats).
+  **EN** Vulnerabilities: exposed sensitive files with soft 404 protection, directory listing, meta generator, JavaScript libraries checked against the OSV database (every page of results).

@@ -1,9 +1,29 @@
 {
-  "name": "site-audit",
+  "name": "@kaveraa/site-audit",
   "version": "0.1.0",
-  "description": "Audit a website you own: SEO, security headers and known vulnerabilities.",
+  "description": "Audit a website you own from the command line: SEO, security headers, TLS and known vulnerabilities, with a fix for every finding.",
+  "keywords": [
+    "seo",
+    "security",
+    "audit",
+    "headers",
+    "tls",
+    "csp",
+    "hsts",
+    "vulnerabilities",
+    "osv",
+    "cli"
+  ],
+  "homepage": "https://github.com/kaveraa/site-audit#readme",
+  "bugs": {
+    "url": "https://github.com/kaveraa/site-audit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaveraa/site-audit.git"
+  },
   "license": "MIT",
-  "author": "Augustin Kavera",
+  "author": "Augustin Kavera (https://github.com/kaveraa)",
   "type": "module",
   "bin": {
     "site-audit": "dist/cli.js"
@@ -22,15 +42,12 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "node --test \"test/**/*.test.ts\"",
     "typecheck": "tsc -p tsconfig.json",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
-  "keywords": [
-    "seo",
-    "security",
-    "audit",
-    "headers",
-    "cli"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "node-html-parser": "^9.0.4"
   },
